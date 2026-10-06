@@ -1,0 +1,1373 @@
+:root {
+  --bg-metal: #dfdbd2;
+  --console-frame: #ece9e1;
+  --console-bevel: #c8c2b5;
+  --sticker-bg: #f8fafc;
+  --tfl-blue: #00205B;
+  --tfl-teal: #00A4A6;
+  --tfl-cyan: #00bcd4;
+  --tfl-red: #E03A3E;
+  --tfl-amber: #FF9E1B;
+  --tfl-green: #00A859;
+  --screen-green: #00ff66;
+  --screen-blue: #00e5ff;
+  --lcd-amber: #ffaa00;
+  --dark-panel: #1a2230;
+  --font-tech: 'Chakra Petch', 'Share Tech Mono', monospace;
+  --font-label: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background: radial-gradient(circle at 50% 30%, #2b3542 0%, #151b24 100%);
+  color: #1e293b;
+  font-family: var(--font-label);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+  padding: 16px;
+}
+
+/* Star Wars Hyperspace Canvas: overlays entire viewport during warp */
+#hyperspaceCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+body.warp-active #hyperspaceCanvas {
+  opacity: 1;
+}
+
+body.warp-active #app {
+  animation: warpRumble 0.05s infinite alternate;
+  filter: contrast(1.2) brightness(1.15) saturate(1.25);
+}
+
+@keyframes warpRumble {
+  0% { transform: translate(-1.5px, 1.5px) rotate(-0.1deg); }
+  100% { transform: translate(1.5px, -1.5px) rotate(0.1deg); }
+}
+
+#app {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.1s ease;
+}
+
+/* Top Cab Viewport / Simulation Window */
+.train-cab-header {
+  width: 96%;
+  background: #111827;
+  border-radius: 12px 12px 0 0;
+  border: 4px solid #374151;
+  border-bottom: none;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.train-info-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #0f172a;
+  border-bottom: 2px solid #1e293b;
+  font-family: var(--font-tech);
+}
+
+.badge-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.route-badge {
+  background: var(--tfl-teal);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.status-indicator {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseLed 1.2s infinite;
+}
+
+@keyframes pulseLed {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.destination-display {
+  background: #000;
+  color: #f59e0b;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 4px 18px;
+  border-radius: 4px;
+  border: 1px solid #78350f;
+  text-shadow: 0 0 8px #f59e0b;
+}
+
+.hud-telemetry {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.speed-indicator {
+  font-size: 20px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Front train cab window track scene */
+.front-window {
+  height: 120px;
+  background: linear-gradient(180deg, #091322 0%, #0d1e35 60%, #152538 100%);
+  position: relative;
+  overflow: hidden;
+  perspective: 400px;
+}
+
+.track-perspective {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.skyline-buildings {
+  position: absolute;
+  bottom: 40px;
+  width: 200%;
+  height: 45px;
+  background-image: repeating-linear-gradient(90deg, #162438 0px, #162438 25px, #1c2e47 25px, #1c2e47 45px, #111d2d 45px, #111d2d 75px);
+  animation: scrollSkyline 18s linear infinite;
+}
+
+@keyframes scrollSkyline {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.rails-container {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 260px;
+  height: 80px;
+  transform: translateX(-50%) rotateX(60deg);
+  transform-origin: bottom center;
+}
+
+.rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1, #64748b);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.rail-left { left: 30px; transform: rotate(-8deg); }
+.rail-right { right: 30px; transform: rotate(8deg); }
+
+.third-rail {
+  position: absolute;
+  right: 15px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+  transform: rotate(8deg);
+}
+
+.sleeper-track {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(180deg, transparent 0px, transparent 10px, #475569 10px, #475569 14px);
+  animation: moveTrack 0.6s linear infinite;
+}
+
+@keyframes moveTrack {
+  0% { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+body.warp-active .sleeper-track {
+  animation-duration: 0.05s !important;
+}
+
+.window-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px 18px;
+}
+
+.station-sign-box {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.next-station-sign {
+  font-family: var(--font-tech);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.warp-alert-banner {
+  background: rgba(224, 58, 62, 0.9);
+  color: #ffffff;
+  font-family: var(--font-tech);
+  font-weight: 700;
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 15px var(--tfl-red);
+  display: none;
+  animation: flashAlert 0.25s infinite alternate;
+}
+
+body.warp-active .warp-alert-banner {
+  display: block;
+}
+
+@keyframes flashAlert {
+  0% { opacity: 0.7; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1.02); }
+}
+
+/* ==========================================================================
+   CONSOLE BOX ENCLOSURE (Matching the real physical beige box in photo)
+   ========================================================================== */
+.console-box {
+  width: 100%;
+  background: linear-gradient(180deg, #ede9df 0%, #dfd9cb 45%, #d1c9b8 100%);
+  border: 8px solid #bab19e;
+  border-radius: 18px;
+  box-shadow: 
+    inset 0 4px 10px rgba(255, 255, 255, 0.8),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.25),
+    0 16px 40px rgba(0, 0, 0, 0.55);
+  padding: 14px 18px 24px 18px;
+  position: relative;
+}
+
+/* Physical feet underneath the console box (greenish feet in photo) */
+.console-legs {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 100px;
+  margin-top: 6px;
+}
+
+.console-legs .foot {
+  width: 56px;
+  height: 14px;
+  background: radial-gradient(circle at 50% 30%, #157366 0%, #0d463e 100%);
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   STICKER PLATE (The exact white vinyl sticker with rounded corners)
+   ========================================================================== */
+.sticker-plate {
+  background: #fbfcfe;
+  border-radius: 12px;
+  border: 3px solid #d5dbdb;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  padding: 16px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  background-image: radial-gradient(#e2e8f0 0.75px, transparent 0.75px);
+  background-size: 20px 20px;
+}
+
+/* --------------------------------------------------------------------------
+   TOP ROW: Connectors, Rockers, Big Gauge, Faders, Speedo, Switch Matrix
+   -------------------------------------------------------------------------- */
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+}
+
+/* DB9 serial connectors & mini sliders */
+.connectors-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serial-ports {
+  display: grid;
+  grid-template-columns: repeat(2, 42px);
+  grid-gap: 6px;
+}
+
+.db9-port {
+  width: 42px;
+  height: 20px;
+  background: #1e293b;
+  border: 2px solid #64748b;
+  border-radius: 4px;
+  position: relative;
+  clip-path: polygon(10% 0%, 90% 0%, 80% 100%, 20% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db9-port .pins {
+  width: 24px;
+  height: 8px;
+  background-image: radial-gradient(#eab308 1.5px, transparent 1.5px);
+  background-size: 5px 4px;
+}
+
+.mini-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-slider input[type="range"] {
+  -webkit-appearance: none;
+  width: 90px;
+  height: 5px;
+  background: #cbd5e1;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.track-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 12px;
+  background: #f8fafc;
+  border: 1.5px solid #0284c7;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Rocker switches cluster & D-pad */
+.rocker-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rocker-switch {
+  width: 24px;
+  height: 38px;
+  border-radius: 4px;
+  border: 2px solid #334155;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.1s;
+}
+
+.rocker-switch.yellow {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+}
+
+.rocker-switch.red {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+}
+
+.rocker-switch.white {
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+}
+
+.rocker-switch:active, .rocker-switch.active {
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.4);
+  transform: translateY(2px);
+}
+
+.dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.dpad-mid {
+  display: flex;
+  align-items: center;
+}
+
+.dpad-btn {
+  width: 18px;
+  height: 18px;
+  background: #64748b;
+  color: #fff;
+  border: 1px solid #334155;
+  border-radius: 3px;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dpad-btn:hover { background: #0284c7; }
+.dpad-btn:active { background: #0369a1; transform: scale(0.9); }
+.dpad-center { width: 14px; height: 14px; background: #475569; }
+
+/* Big Center Round Gauge (Pressure / Flux) */
+.gauge-center-frame {
+  width: 120px;
+  height: 120px;
+  background: #e2e8f0;
+  border: 4px solid #0284c7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.gauge-round {
+  width: 104px;
+  height: 104px;
+  background: #ffffff;
+  border-radius: 50%;
+  border: 4px solid #334155;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-face {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-image: radial-gradient(circle, transparent 44px, #e2e8f0 45px, transparent 46px);
+}
+
+.gauge-ticks {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 2px dashed #94a3b8;
+}
+
+.gauge-hand {
+  position: absolute;
+  top: 14px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 40px;
+  background: #ef4444;
+  border-radius: 2px;
+  transform-origin: bottom center;
+  transform: rotate(0deg);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.gauge-center-cap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #64748b 0%, #1e293b 100%);
+  border-radius: 50%;
+  border: 1px solid #fff;
+}
+
+/* Vertical Faders & Twin Pie Dials */
+.faders-and-pies {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.vertical-faders {
+  display: flex;
+  gap: 10px;
+}
+
+.vert-slider-wrap {
+  height: 90px;
+  display: flex;
+  align-items: center;
+}
+
+.vert-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 6px;
+  height: 80px;
+  -webkit-appearance: none;
+  background: #cbd5e1;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.vert-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 14px;
+  background: #f59e0b;
+  border: 2px solid #b45309;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.pie-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pie-gauge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid #334155;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.pie-gauge.pie-red {
+  background: conic-gradient(#ef4444 0% 50%, #38bdf8 50% 100%);
+}
+
+.pie-gauge.pie-green {
+  background: conic-gradient(#10b981 0% 40%, #0284c7 40% 75%, #f59e0b 75% 100%);
+}
+
+.pie-needle {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 1px;
+  transform-origin: bottom center;
+  transform: rotate(45deg);
+  box-shadow: 0 0 2px #000;
+}
+
+.led-strip-micro {
+  display: flex;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.m-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  border: 1px solid #334155;
+}
+
+.m-led.active.cyan { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; }
+.m-led.active.red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.m-led.active.green { background: #10b981; box-shadow: 0 0 6px #10b981; }
+.m-led.active.amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+/* Speedometer Arch Gauge & Flow Bars */
+.speedo-arch-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.speedo-arch {
+  width: 120px;
+  height: 74px;
+  background: #ffffff;
+  border: 4px solid #0284c7;
+  border-radius: 60px 60px 0 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.speedo-ticks {
+  position: absolute;
+  top: 6px;
+  width: 96px;
+  height: 48px;
+  border: 2px dashed #94a3b8;
+  border-bottom: none;
+  border-radius: 48px 48px 0 0;
+}
+
+.speedo-needle {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: 3px;
+  height: 46px;
+  background: #ef4444;
+  transform-origin: bottom center;
+  transform: rotate(-65deg);
+  transition: transform 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.speedo-center-pin {
+  position: absolute;
+  bottom: 6px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  background: #1e293b;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  z-index: 2;
+}
+
+.speedo-readout {
+  font-family: var(--font-tech);
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+  z-index: 3;
+}
+
+.horiz-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 120px;
+}
+
+.meter-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  width: 60%;
+  transition: width 0.1s linear;
+}
+
+.meter-fill.gradient-1 {
+  background: linear-gradient(90deg, #10b981 0%, #38bdf8 70%, #ef4444 100%);
+}
+
+.meter-fill.gradient-2 {
+  background: linear-gradient(90deg, #f59e0b 0%, #06b6d4 100%);
+  width: 85%;
+}
+
+/* Right Switch Matrices & Rotary Knobs */
+.right-matrix-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vertical-meter-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #1e293b;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.v-segment {
+  width: 16px;
+  height: 6px;
+  border-radius: 1px;
+  opacity: 0.25;
+  transition: opacity 0.1s;
+}
+
+.v-segment.red { background: #ef4444; }
+.v-segment.amber { background: #f59e0b; }
+.v-segment.green { background: #10b981; }
+.v-segment.cyan { background: #06b6d4; }
+.v-segment.blue { background: #3b82f6; }
+
+.v-segment.active {
+  opacity: 1;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.blue-push-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, 30px);
+  grid-gap: 6px;
+}
+
+.blue-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dot-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+.dot-led.active.red { background: #ef4444; box-shadow: 0 0 5px #ef4444; }
+.dot-led.active.green { background: #10b981; box-shadow: 0 0 5px #10b981; }
+
+.blue-sq-btn {
+  width: 30px;
+  height: 28px;
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+  color: #fff;
+  font-family: var(--font-tech);
+  font-size: 10px;
+  font-weight: 700;
+  border: 1.5px solid #075985;
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.05s, background 0.1s;
+}
+
+.blue-sq-btn:active, .blue-sq-btn.pushed {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: #0284c7;
+}
+
+/* Rotary grid knobs */
+.rotary-grid-six {
+  display: grid;
+  grid-template-columns: repeat(3, 26px);
+  grid-gap: 6px;
+}
+
+.rotary-knob {
+  width: 26px;
+  height: 26px;
+  background: radial-gradient(circle, #e2e8f0 40%, #0284c7 100%);
+  border: 2px solid #0369a1;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease-out;
+}
+
+.rotary-knob.sm {
+  width: 22px;
+  height: 22px;
+}
+
+.knob-pointer {
+  position: absolute;
+  top: 2px;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 9px;
+  background: #dc2626;
+  border-radius: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   MIDDLE ROW: CRT Screens, Keyboard Strip, Levers, QR Code
+   -------------------------------------------------------------------------- */
+.middle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #eef2f6;
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+}
+
+.physical-lock-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cabinet-keyhole {
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, #cbd5e1 30%, #64748b 100%);
+  border: 3px solid #334155;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cabinet-keyhole:hover {
+  transform: scale(1.08);
+}
+
+.key-slot {
+  width: 4px;
+  height: 18px;
+  background: #0f172a;
+  border-radius: 1px;
+  box-shadow: inset 0 0 2px #000;
+  transition: transform 0.4s ease;
+}
+
+.cabinet-keyhole.active-dance .key-slot {
+  transform: rotate(90deg);
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.key-label {
+  font-family: var(--font-tech);
+  font-size: 9px;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* CRT Screens (Oscilloscope / Radar Visualizers) */
+.crt-screen {
+  width: 170px;
+  height: 100px;
+  background: #00120d;
+  border: 4px solid #1e293b;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 0 12px rgba(0, 255, 102, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.crt-screen.crt-data {
+  background: #021226;
+  box-shadow: 
+    inset 0 0 12px rgba(0, 229, 255, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.crt-glass {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.crt-glass canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+/* Flat Keyboard Membrane Strip */
+.flat-keyboard-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.rotary-five-row {
+  display: flex;
+  gap: 8px;
+}
+
+.micro-dial {
+  width: 18px;
+  height: 18px;
+  background: #e2e8f0;
+  border: 1.5px solid #0284c7;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.micro-pointer {
+  position: absolute;
+  top: 2px;
+  left: calc(50% - 0.75px);
+  width: 1.5px;
+  height: 6px;
+  background: #dc2626;
+}
+
+.membrane-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 16px);
+  grid-gap: 3px;
+  background: #cbd5e1;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #94a3b8;
+}
+
+.membrane-key {
+  width: 16px;
+  height: 16px;
+  background: #f8fafc;
+  border-radius: 2px;
+  border: 1px solid #94a3b8;
+  cursor: pointer;
+  transition: all 0.08s ease;
+}
+
+.membrane-key:active, .membrane-key.active {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  transform: scale(0.9);
+}
+
+/* Toggle stalks & Red Potentiometers */
+.levers-and-pots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-stalks {
+  display: flex;
+  gap: 16px;
+}
+
+.stalk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stalk.thrown {
+  transform: translateY(-4px) rotate(-14deg);
+}
+
+.stalk-knob {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #f8fafc 30%, #94a3b8 100%);
+  border-radius: 50%;
+  border: 1.5px solid #475569;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stalk-stem {
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(90deg, #94a3b8, #f1f5f9, #64748b);
+}
+
+.stalk-base {
+  width: 18px;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 3px;
+}
+
+.mini-red-knobs {
+  display: flex;
+  gap: 10px;
+}
+
+.red-knob {
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle, #f87171 20%, #dc2626 80%);
+  border: 2px solid #991b1b;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s ease-out;
+}
+
+.red-pointer {
+  position: absolute;
+  top: 2px;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 7px;
+  background: #ffffff;
+  border-radius: 1px;
+}
+
+/* Lower Right 4-Dial & QR Card */
+.right-qr-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.four-knob-cluster {
+  display: grid;
+  grid-template-columns: repeat(2, 22px);
+  grid-gap: 6px;
+}
+
+.qr-sticker-card {
+  width: 90px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.qr-sticker-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+}
+
+.qr-graphic {
+  width: 58px;
+  height: 58px;
+}
+
+.qr-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.qr-caption {
+  font-size: 7.5px;
+  line-height: 1.2;
+  color: #475569;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   BOTTOM ROW: The 4 Big Driver Push Buttons + Redrawn Roundel
+   -------------------------------------------------------------------------- */
+.hero-button-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 18px 10px 10px 10px;
+  border-top: 2px dashed #e2e8f0;
+  position: relative;
+}
+
+.driver-button-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Big Dome Arcade Push Button */
+.driver-dome-button {
+  width: 110px;
+  height: 110px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  border-radius: 50%;
+  padding: 0;
+  transition: transform 0.08s ease;
+  touch-action: manipulation;
+}
+
+.driver-dome-button:active, .driver-dome-button.is-pressed {
+  transform: scale(0.93) translateY(4px);
+}
+
+.dome-bezel-outer {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  padding: 7px;
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.28),
+    0 3px 6px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9);
+}
+
+.dome-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #334155;
+  padding: 6px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+.dome-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 -8px 14px rgba(0, 0, 0, 0.45),
+    inset 0 8px 14px rgba(255, 255, 255, 0.4);
+  transition: all 0.15s ease;
+}
+
+/* Button 1 Color: Mind the Gap Red/Orange */
+.dome-core.red {
+  background: radial-gradient(circle at 40% 35%, #ff6b6b 0%, #ee3a3a 50%, #991b1b 100%);
+  box-shadow: 0 0 20px rgba(238, 58, 58, 0.4);
+}
+
+.driver-dome-button:active .dome-core.red,
+.driver-dome-button.is-pressed .dome-core.red {
+  background: radial-gradient(circle at 40% 35%, #ff8e8e 0%, #ff4d4d 50%, #b91c1c 100%);
+  box-shadow: 0 0 32px rgba(238, 58, 58, 0.9);
+}
+
+/* Button 2 Color: Woolwich Ferry Horn Cyan/Blue */
+.dome-core.blue {
+  background: radial-gradient(circle at 40% 35%, #38bdf8 0%, #0284c7 50%, #0c4a6e 100%);
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.4);
+}
+
+.driver-dome-button:active .dome-core.blue,
+.driver-dome-button.is-pressed .dome-core.blue {
+  background: radial-gradient(circle at 40% 35%, #7dd3fc 0%, #38bdf8 50%, #0369a1 100%);
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.9);
+}
+
+/* Button 3 Color: Bow Church Bells Amber/Gold */
+.dome-core.amber {
+  background: radial-gradient(circle at 40% 35%, #fde047 0%, #eab308 50%, #854d0e 100%);
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+}
+
+.driver-dome-button:active .dome-core.amber,
+.driver-dome-button.is-pressed .dome-core.amber {
+  background: radial-gradient(circle at 40% 35%, #fef08a 0%, #facc15 50%, #a16207 100%);
+  box-shadow: 0 0 32px rgba(234, 179, 8, 0.9);
+}
+
+/* Button 4 Color: High Speed Green/Emerald */
+.dome-core.green {
+  background: radial-gradient(circle at 40% 35%, #4ade80 0%, #16a34a 50%, #14532d 100%);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.4);
+}
+
+.driver-dome-button:active .dome-core.green,
+.driver-dome-button.is-pressed .dome-core.green {
+  background: radial-gradient(circle at 40% 35%, #86efac 0%, #22c55e 50%, #15803d 100%);
+  box-shadow: 0 0 35px rgba(34, 197, 94, 0.95);
+}
+
+/* Realistic specular dome lens reflection gloss */
+.dome-gloss {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  width: 48px;
+  height: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 50% 50% 40% 40%;
+  transform: rotate(-24deg);
+  pointer-events: none;
+}
+
+/* Button Typography Labels matching the photo */
+.driver-button-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #0284c7;
+  letter-spacing: -0.2px;
+}
+
+.driver-button-label .label-line {
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   DOCKLANDS REDRAWN ROUNDEL BADGE (Safe from TfL copyright, uses 'DOK')
+   -------------------------------------------------------------------------- */
+.docklands-roundel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 100px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.docklands-roundel-container:hover {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.docklands-roundel {
+  width: 130px;
+  height: 90px;
+}
+
+.roundel-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER / HINT
+   -------------------------------------------------------------------------- */
+.console-footer {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.footer-hint {
+  font-size: 13px;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: inline-block;
+}
+
+.footer-hint strong {
+  color: #38bdf8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .top-row, .middle-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-button-row {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .driver-dome-button {
+    width: 85px;
+    height: 85px;
+  }
+  .driver-button-label {
+    font-size: 14px;
+  }
+}

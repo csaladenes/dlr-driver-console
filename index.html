@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DLR Driver Console - Pretend Driving Station</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Share+Tech+Mono&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Star Wars Hyperspace Canvas Overlay (Hidden until High Speed is held) -->
+  <canvas id="hyperspaceCanvas"></canvas>
+  
+  <div id="app">
+    <!-- Top Train Cab Viewport & HUD -->
+    <header class="train-cab-header">
+      <div class="train-info-bar">
+        <div class="badge-group">
+          <span class="route-badge pulse">AUTODRIVE B23</span>
+          <span class="status-indicator live">SIGNAL CLEAR</span>
+        </div>
+        <span class="destination-display" id="destDisplay">BANK via CANARY WHARF</span>
+        <div class="hud-telemetry">
+          <span class="hud-label">VELOCITY:</span>
+          <span class="speed-indicator" id="speedText">0 km/h</span>
+        </div>
+      </div>
+      
+      <div class="front-window" id="frontWindow">
+        <!-- 3D perspective simulated tunnel & London skyline -->
+        <div class="track-perspective">
+          <div class="sky-canary-wharf">
+            <div class="skyline-buildings"></div>
+          </div>
+          <div class="rails-container" id="railsContainer">
+            <div class="rail rail-left"></div>
+            <div class="rail rail-right"></div>
+            <div class="third-rail"></div>
+            <div class="sleeper-track" id="sleeperTrack"></div>
+          </div>
+        </div>
+        <div class="window-overlay">
+          <div class="station-sign-box">
+            <span class="station-icon">🚇</span>
+            <span class="next-station-sign" id="nextStation">NEXT: SHADOWS TUNNEL</span>
+          </div>
+          <div class="warp-alert-banner" id="warpAlert">HYPERDRIVE ACTIVE - WARP FACTOR 9</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Outer Console Enclosure -->
+    <main class="console-box" id="consoleBox">
+      <!-- The Vinyl Sticker Panel matching the DLR photo -->
+      <section class="sticker-plate" id="stickerPlate">
+        
+        <!-- Top Accessory Row: Connectors / DB9s, Toggles, Dials -->
+        <div class="top-row">
+          <!-- DB9 / Serial Connectors & Mini Dips -->
+          <div class="connectors-cluster">
+            <div class="serial-ports">
+              <div class="db9-port"><div class="pins"></div></div>
+              <div class="db9-port"><div class="pins"></div></div>
+              <div class="db9-port"><div class="pins"></div></div>
+              <div class="db9-port"><div class="pins"></div></div>
+            </div>
+            <!-- Sliders on top-left -->
+            <div class="mini-sliders">
+              <div class="track-slider"><input type="range" class="auto-slider" id="sensSlider1" min="0" max="100" value="30"></div>
+              <div class="track-slider"><input type="range" class="auto-slider" id="sensSlider2" min="0" max="100" value="65"></div>
+            </div>
+          </div>
+
+          <!-- Rocker switch cluster -->
+          <div class="rocker-cluster">
+            <button class="rocker-switch yellow" id="rocker1" aria-label="Aux Power 1" title="Traction Control"></button>
+            <button class="rocker-switch red active" id="rocker2" aria-label="Master Isolator" title="Master Isolator"></button>
+            <button class="rocker-switch white" id="rocker3" aria-label="Cab Lighting" title="Cab Atmosphere"></button>
+            <!-- D-Pad Navigation -->
+            <div class="dpad">
+              <button class="dpad-btn up" id="dpadUp" title="Signal Boost">▲</button>
+              <div class="dpad-mid">
+                <button class="dpad-btn left" id="dpadLeft" title="Track Switch Left">◀</button>
+                <div class="dpad-center"></div>
+                <button class="dpad-btn right" id="dpadRight" title="Track Switch Right">▶</button>
+              </div>
+              <button class="dpad-btn down" id="dpadDown" title="Brake Test">▼</button>
+            </div>
+          </div>
+
+          <!-- Big Center Gauge (Pressure / Flux Dial) -->
+          <div class="gauge-center-frame">
+            <div class="gauge-round" id="gaugeCenter">
+              <div class="gauge-face">
+                <div class="gauge-ticks"></div>
+                <div class="gauge-hand dancing-needle" id="handCenter"></div>
+                <div class="gauge-center-cap"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vertical faders & twin dancing pie dials -->
+          <div class="faders-and-pies">
+            <div class="vertical-faders">
+              <div class="vert-slider-wrap">
+                <input type="range" orient="vertical" class="vert-slider auto-slider" id="fader1" min="0" max="100" value="70">
+              </div>
+              <div class="vert-slider-wrap">
+                <input type="range" orient="vertical" class="vert-slider auto-slider" id="fader2" min="0" max="100" value="45">
+              </div>
+            </div>
+            <!-- Pie Dials with dancing needle spinners -->
+            <div class="pie-container">
+              <div class="pie-gauge pie-red dancing-knob" id="pie1" data-dancing-speed="1.2">
+                <div class="pie-needle" id="pieNeedle1"></div>
+              </div>
+              <div class="pie-gauge pie-green dancing-knob" id="pie2" data-dancing-speed="0.8">
+                <div class="pie-needle" id="pieNeedle2"></div>
+              </div>
+              <!-- Status LEDs under pie -->
+              <div class="led-strip-micro">
+                <span class="m-led cyan active" id="mled1"></span>
+                <span class="m-led red" id="mled2"></span>
+                <span class="m-led green active" id="mled3"></span>
+                <span class="m-led amber" id="mled4"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Speedometer Arch Gauge & Flow Bars -->
+          <div class="speedo-arch-container">
+            <div class="speedo-arch" id="speedoArch">
+              <div class="speedo-ticks"></div>
+              <div class="speedo-needle" id="speedoNeedle"></div>
+              <div class="speedo-center-pin"></div>
+              <div class="speedo-readout" id="speedoOdo">042.8</div>
+            </div>
+            <!-- Horizontal Level Meters -->
+            <div class="horiz-meters">
+              <div class="meter-bar"><div class="meter-fill gradient-1" id="meter1"></div></div>
+              <div class="meter-bar"><div class="meter-fill gradient-2" id="meter2"></div></div>
+            </div>
+          </div>
+
+          <!-- Right Switch Matrices & Rotary Knobs -->
+          <div class="right-matrix-panel">
+            <!-- Level indicator LED bar column -->
+            <div class="vertical-meter-column" id="vuMeter">
+              <div class="v-segment red"></div>
+              <div class="v-segment amber active"></div>
+              <div class="v-segment green active"></div>
+              <div class="v-segment cyan active"></div>
+              <div class="v-segment blue active"></div>
+            </div>
+
+            <!-- 2x2 Big Blue Buttons with Status LEDs -->
+            <div class="blue-push-blocks">
+              <div class="blue-btn-wrap">
+                <span class="dot-led red active" id="ledB1"></span>
+                <button class="blue-sq-btn" id="btnB1">I</button>
+              </div>
+              <div class="blue-btn-wrap">
+                <span class="dot-led green" id="ledB2"></span>
+                <button class="blue-sq-btn" id="btnB2">II</button>
+              </div>
+              <div class="blue-btn-wrap">
+                <span class="dot-led red" id="ledB3"></span>
+                <button class="blue-sq-btn" id="btnB3">III</button>
+              </div>
+              <div class="blue-btn-wrap">
+                <span class="dot-led green active" id="ledB4"></span>
+                <button class="blue-sq-btn" id="btnB4">IV</button>
+              </div>
+            </div>
+
+            <!-- Rotary dials grid (6 dancing dials!) -->
+            <div class="rotary-grid-six">
+              <div class="rotary-knob dancing-knob" data-knob="1" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob dancing-knob" data-knob="2" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob dancing-knob" data-knob="3" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob dancing-knob" data-knob="4" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob dancing-knob" data-knob="5" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob dancing-knob" data-knob="6" title="Click or watch it dance!"><div class="knob-pointer"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Row: CRT Displays, Keypad, Oscilloscope, Switches & QR -->
+        <div class="middle-row">
+          <!-- Key lock switch on far left (physical console lock) -->
+          <div class="physical-lock-col">
+            <button class="cabinet-keyhole" id="keyholeBtn" title="Driver Master Key Switch (Toggle Auto-Dance!)">
+              <div class="key-slot" id="keySlot"></div>
+            </button>
+            <span class="key-label">AUTO</span>
+          </div>
+
+          <!-- Oscilloscope Screen 1 (Green Audio/Signal Visualizer) -->
+          <div class="crt-screen crt-radar">
+            <div class="crt-glass">
+              <canvas id="canvasOscillo1" width="180" height="100"></canvas>
+              <div class="crt-scanlines"></div>
+            </div>
+          </div>
+
+          <!-- Center Keyboard Console (Grid of illuminated tactile buttons) -->
+          <div class="flat-keyboard-strip">
+            <div class="rotary-five-row">
+              <div class="micro-dial dancing-knob" data-knob="11"><div class="micro-pointer"></div></div>
+              <div class="micro-dial dancing-knob" data-knob="12"><div class="micro-pointer"></div></div>
+              <div class="micro-dial dancing-knob" data-knob="13"><div class="micro-pointer"></div></div>
+              <div class="micro-dial dancing-knob" data-knob="14"><div class="micro-pointer"></div></div>
+              <div class="micro-dial dancing-knob" data-knob="15"><div class="micro-pointer"></div></div>
+            </div>
+            <div class="membrane-grid" id="membraneGrid">
+              <!-- Dynamically rendered 3x10 keyboard tiles -->
+            </div>
+          </div>
+
+          <!-- Oscilloscope Screen 2 (Blue Track/Data Visualizer) -->
+          <div class="crt-screen crt-data">
+            <div class="crt-glass">
+              <canvas id="canvasOscillo2" width="180" height="100"></canvas>
+              <div class="crt-scanlines"></div>
+            </div>
+          </div>
+
+          <!-- Dual Toggle Levers and Red Knobs -->
+          <div class="levers-and-pots">
+            <div class="toggle-stalks">
+              <div class="stalk" id="stalk1" title="Pantograph Control">
+                <div class="stalk-knob"></div>
+                <div class="stalk-stem"></div>
+                <div class="stalk-base"></div>
+              </div>
+              <div class="stalk" id="stalk2" title="Track Sanders">
+                <div class="stalk-knob"></div>
+                <div class="stalk-stem"></div>
+                <div class="stalk-base"></div>
+              </div>
+            </div>
+            <!-- Red knobs (Dancing pots!) -->
+            <div class="mini-red-knobs">
+              <div class="red-knob dancing-knob" data-knob="16"><div class="red-pointer"></div></div>
+              <div class="red-knob dancing-knob" data-knob="17"><div class="red-pointer"></div></div>
+              <div class="red-knob dancing-knob" data-knob="18"><div class="red-pointer"></div></div>
+            </div>
+          </div>
+
+          <!-- Lower Right 4-Dial Cluster and QR Badge -->
+          <div class="right-qr-cluster">
+            <div class="four-knob-cluster">
+              <div class="rotary-knob sm dancing-knob" data-knob="7"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob sm dancing-knob" data-knob="8"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob sm dancing-knob" data-knob="9"><div class="knob-pointer"></div></div>
+              <div class="rotary-knob sm dancing-knob" data-knob="10"><div class="knob-pointer"></div></div>
+            </div>
+            <!-- TfL Style Driver QR Code (Opens fun train audio test) -->
+            <div class="qr-sticker-card" id="qrCard" title="Tap to scan TfL DLR Driver Code">
+              <div class="qr-graphic">
+                <svg viewBox="0 0 100 100" class="qr-svg">
+                  <rect x="0" y="0" width="100" height="100" fill="#fff"/>
+                  <rect x="8" y="8" width="28" height="28" fill="#00205B"/>
+                  <rect x="13" y="13" width="18" height="18" fill="#fff"/>
+                  <rect x="18" y="18" width="8" height="8" fill="#00A4A6"/>
+                  <rect x="64" y="8" width="28" height="28" fill="#00205B"/>
+                  <rect x="69" y="13" width="18" height="18" fill="#fff"/>
+                  <rect x="74" y="18" width="8" height="8" fill="#00A4A6"/>
+                  <rect x="8" y="64" width="28" height="28" fill="#00205B"/>
+                  <rect x="13" y="69" width="18" height="18" fill="#fff"/>
+                  <rect x="18" y="74" width="8" height="8" fill="#00A4A6"/>
+                  <rect x="42" y="12" width="16" height="8" fill="#00205B"/>
+                  <rect x="42" y="24" width="8" height="14" fill="#00205B"/>
+                  <rect x="12" y="44" width="14" height="8" fill="#00A4A6"/>
+                  <rect x="30" y="42" width="40" height="16" fill="#00205B"/>
+                  <rect x="46" y="66" width="14" height="26" fill="#00205B"/>
+                  <rect x="68" y="46" width="24" height="10" fill="#00A4A6"/>
+                  <rect x="66" y="66" width="26" height="26" fill="#00205B"/>
+                </svg>
+              </div>
+              <div class="qr-caption">Find out more about<br>the driver cab by<br>tapping this code</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Giant Arcade / Driver Push Buttons (The 4 Hero Buttons) -->
+        <div class="hero-button-row">
+          
+          <!-- Button 1: Mind the Gap -->
+          <div class="driver-button-unit">
+            <button class="driver-dome-button button-red" id="btnMindTheGap" aria-label="Mind the Gap">
+              <div class="dome-bezel-outer">
+                <div class="dome-ring">
+                  <div class="dome-core red">
+                    <span class="dome-gloss"></span>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div class="driver-button-label">
+              <span class="label-line">Mind</span>
+              <span class="label-line">the Gap</span>
+            </div>
+          </div>
+
+          <!-- Button 2: Woolwich Ferry Horn -->
+          <div class="driver-button-unit">
+            <button class="driver-dome-button button-blue" id="btnWoolwichFerry" aria-label="Woolwich Ferry horn">
+              <div class="dome-bezel-outer">
+                <div class="dome-ring">
+                  <div class="dome-core blue">
+                    <span class="dome-gloss"></span>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div class="driver-button-label">
+              <span class="label-line">Woolwich</span>
+              <span class="label-line">Ferry horn</span>
+            </div>
+          </div>
+
+          <!-- Button 3: Bow Church Bells -->
+          <div class="driver-button-unit">
+            <button class="driver-dome-button button-amber" id="btnBowChurch" aria-label="Bow Church Bells">
+              <div class="dome-bezel-outer">
+                <div class="dome-ring">
+                  <div class="dome-core amber">
+                    <span class="dome-gloss"></span>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div class="driver-button-label">
+              <span class="label-line">Bow Church</span>
+              <span class="label-line">Bells</span>
+            </div>
+          </div>
+
+          <!-- Button 4: High Speed (Hold down for Star Wars Warp!) -->
+          <div class="driver-button-unit">
+            <button class="driver-dome-button button-green" id="btnHighSpeed" aria-label="High Speed Warp">
+              <div class="dome-bezel-outer">
+                <div class="dome-ring">
+                  <div class="dome-core green">
+                    <span class="dome-gloss"></span>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div class="driver-button-label">
+              <span class="label-line">High</span>
+              <span class="label-line">Speed</span>
+            </div>
+          </div>
+
+          <!-- Redrawn Roundel Logo (Custom docklands styling, NO copyrighted TfL 'DLR' trademark text) -->
+          <div class="docklands-roundel-container" id="docklandsRoundel" title="Docklands Express Cab Roundel">
+            <div class="docklands-roundel">
+              <svg viewBox="0 0 160 120" class="roundel-svg">
+                <!-- Teal outer ring with blue inner border -->
+                <circle cx="80" cy="60" r="48" fill="none" stroke="#00A4A6" stroke-width="16" />
+                <circle cx="80" cy="60" r="56" fill="none" stroke="#007788" stroke-width="2" />
+                <circle cx="80" cy="60" r="40" fill="none" stroke="#005566" stroke-width="2" />
+                <!-- Deep Docklands Blue Bar across center -->
+                <rect x="4" y="44" width="152" height="32" rx="4" fill="#00205B" stroke="#00153D" stroke-width="2" />
+                <!-- Playful redrawn railway emblem / clean high-tech letters: DOK -->
+                <text x="80" y="67" font-family="'Inter', 'Arial Black', sans-serif" font-weight="900" font-size="21" fill="#FFFFFF" text-anchor="middle" letter-spacing="3.5">DOK</text>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Physical Console Feet / Mounting -->
+      <div class="console-legs">
+        <div class="foot left"></div>
+        <div class="foot right"></div>
+      </div>
+    </main>
+
+    <!-- Interactive Overlay Sound & Status Bar -->
+    <footer class="console-footer">
+      <div class="footer-hint">
+        🎮 <strong>DLR Front Seat Playground:</strong> Hold <strong>High Speed</strong> for Star Wars Warp hyperspace! Dials auto-dance rhythmically. Tap Keyhole to toggle dance.
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
