@@ -35,6 +35,9 @@ class AudioEngine {
     for (const [key, url] of Object.entries(this.soundUrls)) {
       try {
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
         const arrayBuffer = await response.arrayBuffer();
         this.audioBuffers[key] = await this.ctx.decodeAudioData(arrayBuffer);
       } catch (err) {
