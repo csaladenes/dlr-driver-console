@@ -23,4 +23,4 @@ bun server.js
 # or
 python3 -m http.server 4173
 ```
-Then open `http://localhost:4173` in any browser.
+Then open `http://localhost:4173` in any browser. Enjoy!
